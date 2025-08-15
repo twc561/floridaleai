@@ -1,6 +1,5 @@
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -15,9 +14,6 @@ void main() async {
   // Ensure Flutter is initialized.
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Load environment variables.
-  await dotenv.load(fileName: ".env");
-
   // Initialize Firebase.
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
@@ -30,18 +26,12 @@ void main() async {
     // appleProvider: AppleProvider.appAttest, // For iOS
   );
 
-  final apiKey = dotenv.env['GEMINI_API_KEY'];
-  if (apiKey == null) {
-    print('Error: GEMINI_API_KEY is not set in .env file');
-    return;
-  }
-
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (context) => ThemeProvider()),
+        Change-notifierProvider(create: (context) => ThemeProvider()),
         Provider<GeminiService>(
-          create: (_) => GeminiService(apiKey: apiKey),
+          create: (_) => GeminiService(),
         ),
         Provider<AppRouter>(
           create: (_) => AppRouter(),
