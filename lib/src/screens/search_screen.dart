@@ -2,7 +2,6 @@
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // <-- CORRECT IMPORT ADDED
-import 'package:go_router/go_router.dart';
 import 'package:myapp/src/models/statute.dart';
 import 'package:myapp/src/screens/statute_detail_screen.dart';
 import 'package:provider/provider.dart';
