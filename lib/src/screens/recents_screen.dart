@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 
 class RecentsScreen extends StatelessWidget {
@@ -9,10 +10,8 @@ class RecentsScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Recents'),
       ),
-      body: const SingleChildScrollView(
-        child: Center(
-          child: Text('Recents Screen'),
-        ),
+      body: const Center(
+        child: Text('Recents Screen - Placeholder'),
       ),
     );
   }

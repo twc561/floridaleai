@@ -5,10 +5,12 @@ import 'package:flutter/foundation.dart';
 class StatuteResponse {
   final String summary;
   final List<StatuteSection> sections;
+  final List<String> examples;
 
   const StatuteResponse({
     required this.summary,
     required this.sections,
+    required this.examples,
   });
 
   factory StatuteResponse.fromJson(Map<String, dynamic> json) {
@@ -16,9 +18,13 @@ class StatuteResponse {
     final sections = sectionsList
         .map((sectionJson) => StatuteSection.fromJson(sectionJson as Map<String, dynamic>))
         .toList();
+    
+    final examplesList = json['examples'] as List?; // Make it nullable
+
     return StatuteResponse(
       summary: json['summary'] as String,
       sections: sections,
+      examples: examplesList?.map((e) => e as String).toList() ?? [], // Handle null case
     );
   }
 }

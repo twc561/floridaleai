@@ -1,22 +1,45 @@
-# Project Blueprint
+# Blueprint
 
 ## Overview
 
-This document outlines the style, design, and features of the Flutter application. It serves as a single source of truth for the project's current state and future development plans.
+This document outlines the plan for developing a new feature for the application. The goal of this document is to provide a clear and concise overview of the project, including its purpose, scope, and features.
 
-## Style and Design
+## Current Project: Law Enforcement Assistant App
 
-The application will adhere to Material Design 3 principles, with a focus on a clean, modern, and intuitive user experience.
+### Purpose and Capabilities
 
-*   **Theming:** A centralized `ThemeData` object will define the color scheme, typography, and component styles.
-*   **Color Scheme:** A `ColorScheme.fromSeed` will be used to generate a harmonious and accessible color palette.
-*   **Typography:** The `google_fonts` package will be used to provide a consistent and legible typography.
-*   **Layout:** The application will be responsive and adapt to different screen sizes, working seamlessly on mobile and web.
+The Law Enforcement Assistant App is a mobile application designed to provide law enforcement officers with quick access to relevant legal information, tools for field operations, and resources for training and reporting.
 
-## Implemented Features
+### Style, Design, and Features
 
-*   **Android Build System Migration:** The Android build system has been migrated to the modern, declarative Gradle plugin system. This provides a more stable and reliable build process.
+*   **UI/UX:** The app will feature a modern, intuitive interface with a dark theme suitable for use in various lighting conditions. It will use the Material Design 3 component library for a consistent and professional look. The layout will be adaptive, ensuring usability on both phones and tablets.
+*   **Core Features:**
+    *   **Home Screen:** A dashboard providing quick access to frequently used tools and recent updates.
+    *   **Search:** A powerful search function to quickly find statutes, case law, and training materials.
+    *   **Statute & Case Law Reference:** A browsable and searchable database of relevant laws and legal precedents.
+    *   **Field Sobriety Test (FST) Toolkit:** Step-by-step guides and timers for conducting standardized field sobriety tests (HGN, Walk-and-Turn, One-Leg Stand).
+    *   **Crash Scene Helper:** Tools for accident investigation, including a speed calculator and checklists.
+    *   **Language Helper:** A translation tool with common phrases for communicating with non-native English speakers.
+    *   **Report Assistant:** A feature to help officers write accurate and comprehensive reports, potentially using generative AI to summarize events.
+    *   **Field Simulator:** An AI-powered training module that presents officers with realistic scenarios to test their knowledge and decision-making skills.
+    *   **AI Search and Seizure Advisor:** An AI-powered tool to provide guidance on search and seizure scenarios, powered by the Gemini API.
+    *   **Favorites & Recents:** Allow users to save frequently accessed items and view their history.
+*   **Navigation:** The app will use a bottom navigation bar for primary navigation between the main sections (Home, Search, Favorites, More). A nested routing system will handle navigation within each section.
 
-## Current Plan
+## Current Task: Implement Real AI in Search and Seizure Advisor
 
-The immediate goal is to resolve any remaining build issues and ensure the application can be successfully compiled and run on both Android and web.
+### Plan and Steps
+
+1.  **Add Dependencies:** Add `firebase_core` and `firebase_ai` to the `pubspec.yaml` file.
+2.  **Initialize Firebase:** Ensure Firebase is initialized in the `main.dart` file.
+3.  **Create Gemini Service:** Create a `GeminiService` to handle communication with the Gemini API.
+4.  **Connect UI to Service:** Update the `AiSearchAdvisorScreen` to use the `GeminiService` to get real-time advice.
+5.  **Update Blueprint:** Update the `blueprint.md` to reflect the new implementation.
+
+### Work Done
+
+*   Added `firebase_core` and `firebase_ai` to `pubspec.yaml`.
+*   Ensured Firebase is initialized in `main.dart`.
+*   Created the `GeminiService` and connected it to the Gemini API.
+*   Updated the `AiSearchAdvisorScreen` to use the `GeminiService` and display markdown responses.
+*   Updated the `blueprint.md` file.

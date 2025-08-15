@@ -1,97 +1,146 @@
 
 import 'package:flutter/material.dart';
-import 'package:myapp/src/models/statute_response.dart';
-import 'package:myapp/src/services/rag_service.dart';
-import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
+import 'package:myapp/src/data/case_law_data.dart';
+import '../models/statute.dart';
 
-// A map to hold the text styles for different parts of the statute.
-final Map<String, TextStyle> _statuteStyles = {
-  'STATUTE_TITLE': const TextStyle(
-    color: Colors.blue,
-    fontSize: 22,
-    fontWeight: FontWeight.bold,
-  ),
-  'SUBSECTION_HEADER': const TextStyle(
-    color: Colors.black,
-    fontSize: 18,
-    fontWeight: FontWeight.bold,
-  ),
-  'CONTENT_BODY': const TextStyle(
-    color: Colors.black87,
-    fontSize: 16,
-    height: 1.5,
-  ),
-  'HIGHLIGHT': const TextStyle(
-    color: Colors.black,
-    backgroundColor: Colors.yellow,
-    fontSize: 16,
-    height: 1.5,
-  ),
-};
+class StatuteDetailScreen extends StatelessWidget {
+  final Statute statute;
 
-class StatuteDetailScreen extends StatefulWidget {
-  final String query;
-
-  const StatuteDetailScreen({super.key, required this.query});
-
-  @override
-  State<StatuteDetailScreen> createState() => _StatuteDetailScreenState();
-}
-
-class _StatuteDetailScreenState extends State<StatuteDetailScreen> {
-  late final RAGService _ragService;
-  Future<StatuteResponse>? _statuteResponseFuture;
-
-  @override
-  void initState() {
-    super.initState();
-    _ragService = RAGService(Provider.of(context, listen: false));
-    _statuteResponseFuture = _ragService.getStatuteInfo(widget.query);
-  }
+  const StatuteDetailScreen({super.key, required this.statute});
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Statute Details'),
+        title: Text(statute.title),
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
-        child: FutureBuilder<StatuteResponse>(
-          future: _statuteResponseFuture,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            } else if (snapshot.hasError) {
-              return Center(child: Text('Error: ${snapshot.error}'));
-            } else if (!snapshot.hasData) {
-              return const Center(child: Text('No data found.'));
-            }
-
-            final statuteResponse = snapshot.data!;
-            return ListView(
-              children: [
-                Text(
-                  statuteResponse.summary,
-                  style: Theme.of(context).textTheme.headlineSmall,
-                ),
-                const SizedBox(height: 24),
-                RichText(
-                  text: TextSpan(
-                    style: _statuteStyles['CONTENT_BODY'], // Default style
-                    children: statuteResponse.sections.map((section) {
-                      return TextSpan(
-                        text: '${section.content}\n\n', // Add spacing
-                        style: _statuteStyles[section.type],
-                      );
-                    }).toList(),
-                  ),
-                ),
-              ],
-            );
-          },
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              statute.title,
+              style: textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Chip(
+              label: Text(statute.severity, style: textTheme.labelLarge),
+              backgroundColor: theme.colorScheme.secondaryContainer,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              statute.content,
+              style: textTheme.bodyLarge?.copyWith(height: 1.5),
+            ),
+            const SizedBox(height: 24),
+            _buildExpandableSection(
+              theme: theme,
+              title: 'Subsections',
+              icon: Icons.functions,
+              children: statute.subsections.entries
+                  .map((e) => _buildDefinitionCard(e.key, e.value, theme))
+                  .toList(),
+            ),
+            _buildExpandableSection(
+              theme: theme,
+              title: 'Enhancements',
+              icon: Icons.arrow_upward,
+              children:
+                  statute.enhancements.map((e) => _buildListItem(e)).toList(),
+            ),
+            _buildExpandableSection(
+              theme: theme,
+              title: 'Real-World Examples',
+              icon: Icons.lightbulb_outline,
+              children: statute.examples.map((e) => _buildListItem(e)).toList(),
+            ),
+            _buildExpandableSection(
+              theme: theme,
+              title: 'Related Case Law',
+              icon: Icons.gavel,
+              children: statute.relatedCaseLaw
+                  .map((e) => _buildCaseLawLink(context, e))
+                  .toList(),
+            ),
+          ],
         ),
       ),
+    );
+  }
+
+  Widget _buildExpandableSection({
+    required ThemeData theme,
+    required String title,
+    required IconData icon,
+    required List<Widget> children,
+  }) {
+    if (children.isEmpty) {
+      return const SizedBox.shrink();
+    }
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 8.0),
+      elevation: 1.0,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+      child: ExpansionTile(
+        leading: Icon(icon, color: theme.colorScheme.primary),
+        title: Text(title, style: theme.textTheme.titleLarge),
+        childrenPadding: const EdgeInsets.all(16.0),
+        expandedCrossAxisAlignment: CrossAxisAlignment.start,
+        children: children,
+      ),
+    );
+  }
+
+  Widget _buildDefinitionCard(String term, String definition, ThemeData theme) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: RichText(
+        text: TextSpan(
+          style: theme.textTheme.bodyLarge,
+          children: <TextSpan>[
+            TextSpan(
+                text: '$term: ',
+                style: const TextStyle(fontWeight: FontWeight.bold)),
+            TextSpan(text: definition),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildListItem(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('• ', style: TextStyle(fontSize: 16)),
+          Expanded(child: Text(text, style: const TextStyle(fontSize: 16))),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCaseLawLink(BuildContext context, String caseTitle) {
+    final caseItem = caseLawMap[caseTitle];
+    if (caseItem == null) {
+      return ListTile(
+        title: Text(caseTitle),
+        subtitle: const Text('Case not found'),
+      );
+    }
+    return ListTile(
+      title: Text(caseTitle),
+      subtitle: Text(caseItem.citation, overflow: TextOverflow.ellipsis),
+      trailing: const Icon(Icons.chevron_right),
+      onTap: () {
+        GoRouter.of(context).push('/case-law/details', extra: caseItem);
+      },
     );
   }
 }

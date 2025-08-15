@@ -1,156 +1,197 @@
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:provider/provider.dart';
+
 import 'package:myapp/src/models/field_simulator/chat_message.dart';
 import 'package:myapp/src/models/field_simulator/report_card.dart';
 import 'package:myapp/src/models/field_simulator/scenario_info.dart';
 import 'package:myapp/src/services/gemini_service.dart';
-import 'package:provider/provider.dart';
 
-class FieldSimulatorScreen extends StatefulWidget {
+class FieldSimulatorScreen extends StatelessWidget {
   final ScenarioInfo scenarioInfo;
+
   const FieldSimulatorScreen({super.key, required this.scenarioInfo});
 
   @override
-  _FieldSimulatorScreenState createState() => _FieldSimulatorScreenState();
-}
+  Widget build(BuildContext context) {
+    final geminiService = Provider.of<GeminiService>(context, listen: false);
+    
+    // State Management with ValueNotifiers
+    final messagesNotifier = ValueNotifier<List<ChatMessage>>([]);
+    final isLoadingNotifier = ValueNotifier<bool>(false);
+    final textController = TextEditingController();
+    final scrollController = ScrollController();
+    final reportCardNotes = <String>[];
 
-class _FieldSimulatorScreenState extends State<FieldSimulatorScreen> {
-  late final GeminiService _geminiService;
-  final TextEditingController _textController = TextEditingController();
-  final ScrollController _scrollController = ScrollController();
-  final List<ChatMessage> _messages = [];
-  final List<String> _reportCardNotes = [];
-  bool _isLoading = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _geminiService = Provider.of<GeminiService>(context, listen: false);
-    _startScenario();
-  }
-
-  void _startScenario() {
-    _geminiService.startChatSession(widget.scenarioInfo.personaPrompt);
-    setState(() {
-      _messages.add(
+    void scrollToBottom() {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (scrollController.hasClients) {
+          scrollController.animateTo(
+            scrollController.position.maxScrollExtent,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeOut,
+          );
+        }
+      });
+    }
+    
+    // Initial Briefing Message
+    void startScenario() {
+      geminiService.startChatSession(scenarioInfo.personaPrompt);
+      messagesNotifier.value = [
         ChatMessage(
-          text:
-              "**SCENARIO BRIEFING:**\n\n${widget.scenarioInfo.briefing}\n\n**The simulation begins now. What is your first action or statement?**",
+          text: "**SCENARIO BRIEFING:**\n\n${scenarioInfo.briefing}\n\n**The simulation begins now. What is your first action or statement?**",
           sender: ChatSender.system,
         ),
-      );
-    });
-  }
-
-  Future<void> _sendMessage() async {
-    final messageText = _textController.text.trim();
-    if (messageText.isEmpty) return;
-
-    final officerMessage = ChatMessage(text: messageText, sender: ChatSender.officer);
-
-    setState(() {
-      _messages.add(officerMessage);
-      _isLoading = true;
-      _textController.clear();
-    });
-    _scrollToBottom();
-
-    // The service now handles parsing and errors, so the UI code is cleaner.
-    final aiResponse = await _geminiService.continueChat(messageText);
-
-    _messages.add(aiResponse);
-    if (aiResponse.reportCardNote != null && aiResponse.reportCardNote!.isNotEmpty) {
-      _reportCardNotes.add(aiResponse.reportCardNote!);
+      ];
     }
+    
+    startScenario(); // Display the briefing immediately
 
-    if (aiResponse.dynamicEvent != null && aiResponse.dynamicEvent!.isNotEmpty) {
-      _messages.add(
-        ChatMessage(
+    Future<void> sendMessage({String? messageText}) async {
+      final text = messageText ?? textController.text.trim();
+      if (text.isEmpty) return;
+
+      final officerMessage = ChatMessage(text: text, sender: ChatSender.officer);
+      
+      // Update UI immediately with the officer's message
+      messagesNotifier.value = [...messagesNotifier.value, officerMessage];
+      isLoadingNotifier.value = true;
+      textController.clear();
+      scrollToBottom();
+
+      // Get AI response
+      final aiResponse = await geminiService.continueChat(text);
+      
+      // Add AI response and any dynamic events to the chat
+      final newMessages = <ChatMessage>[aiResponse];
+      if (aiResponse.reportCardNote != null && aiResponse.reportCardNote!.isNotEmpty) {
+        reportCardNotes.add(aiResponse.reportCardNote!);
+      }
+      if (aiResponse.dynamicEvent != null && aiResponse.dynamicEvent!.isNotEmpty) {
+        newMessages.add(ChatMessage(
           text: "**DYNAMIC EVENT:**\n${aiResponse.dynamicEvent!}",
           sender: ChatSender.system,
-        ),
-      );
+        ));
+      }
+      
+      messagesNotifier.value = [...messagesNotifier.value, ...newMessages];
+      isLoadingNotifier.value = false;
+      scrollToBottom();
     }
 
-    setState(() {
-      _isLoading = false;
-    });
-    _scrollToBottom();
-  }
+    void viewReportCard() {
+      final performance = reportCardNotes.length > 5 && !reportCardNotes.any((note) => note.contains('escalated'))
+          ? OverallPerformance.excellent
+          : OverallPerformance.needsImprovement;
 
-  void _viewReportCard() {
-    final performance = _reportCardNotes.length > 5 && !_reportCardNotes.any((note) => note.contains('escalated'))
-        ? OverallPerformance.excellent
-        : OverallPerformance.needsImprovement;
+      final reportCard = ReportCard(
+        scenarioTitle: scenarioInfo.title,
+        learningObjectives: scenarioInfo.learningObjectives,
+        performanceNotes: reportCardNotes,
+        overallPerformance: performance,
+        chatHistory: messagesNotifier.value,
+      );
 
-    final reportCard = ReportCard(
-      scenarioTitle: widget.scenarioInfo.title,
-      learningObjectives: widget.scenarioInfo.learningObjectives,
-      performanceNotes: _reportCardNotes,
-      overallPerformance: performance,
-    );
+      GoRouter.of(context).pushReplacement('/scenario-summary', extra: reportCard);
+    }
 
-    GoRouter.of(context).pushReplacement('/scenario-summary', extra: reportCard);
-  }
+    void endSimulationWithArrest() {
+      reportCardNotes.add("Officer initiated an arrest, concluding the simulation.");
+      messagesNotifier.value = [...messagesNotifier.value, 
+        const ChatMessage(
+          text: "**SIMULATION ENDED:**\nYou have chosen to arrest the subject.",
+          sender: ChatSender.system,
+        ),
+      ];
+      viewReportCard();
+    }
 
-  void _scrollToBottom() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_scrollController.hasClients) {
-        _scrollController.animateTo(
-          _scrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOut,
-        );
-      }
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.scenarioInfo.title),
+        title: Text(scenarioInfo.title),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.description_outlined),
-            onPressed: _viewReportCard,
-            tooltip: 'End Simulation & View Report',
-          ),
+          TextButton(
+            onPressed: viewReportCard,
+            child: const Text('End Simulation'),
+          )
         ],
       ),
       body: Column(
         children: [
           Expanded(
-            child: ListView.builder(
-              controller: _scrollController,
-              padding: const EdgeInsets.all(8.0),
-              itemCount: _messages.length,
-              itemBuilder: (context, index) {
-                final message = _messages[index];
-                if (message.sender == ChatSender.officer) {
-                  return _OfficerMessage(message: message);
-                } else {
-                  return _SubjectMessage(message: message);
-                }
+            child: ValueListenableBuilder<List<ChatMessage>>(
+              valueListenable: messagesNotifier,
+              builder: (context, messages, child) {
+                return ListView.builder(
+                  controller: scrollController,
+                  padding: const EdgeInsets.all(8.0),
+                  itemCount: messages.length,
+                  itemBuilder: (context, index) {
+                    final message = messages[index];
+                    return message.sender == ChatSender.officer
+                        ? OfficerMessage(message: message)
+                        : SubjectMessage(message: message);
+                  },
+                );
               },
             ),
           ),
-          if (_isLoading) const LinearProgressIndicator(),
-          _buildTextComposer(),
+          ValueListenableBuilder<bool>(
+            valueListenable: isLoadingNotifier,
+            builder: (context, isLoading, child) {
+              return Column(
+                children: [
+                  if (isLoading) const LinearProgressIndicator(),
+                  _buildActionChips(context, isLoading, endSimulationWithArrest, sendMessage),
+                  _buildTextComposer(context, isLoading, textController, sendMessage),
+                ],
+              );
+            },
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildTextComposer() {
+  Widget _buildActionChips(BuildContext context, bool isLoading, void Function() endSimulationWithArrest, Future<void> Function({String? messageText}) sendMessage) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+      child: Wrap(
+        spacing: 8.0,
+        runSpacing: 4.0,
+        children: scenarioInfo.suggestedActions.map((action) {
+          final isArrest = action.toLowerCase() == 'arrest';
+          return ActionChip(
+            label: Text(action),
+            onPressed: isLoading
+                ? null
+                : () {
+                    if (isArrest) {
+                      endSimulationWithArrest();
+                    } else {
+                      sendMessage(messageText: action);
+                    }
+                  },
+            backgroundColor: isArrest ? Theme.of(context).colorScheme.errorContainer : null,
+            labelStyle: isArrest ? TextStyle(color: Theme.of(context).colorScheme.onErrorContainer) : null,
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  Widget _buildTextComposer(BuildContext context, bool isLoading, TextEditingController textController, Future<void> Function({String? messageText}) sendMessage) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Row(
         children: [
           Expanded(
             child: TextField(
-              controller: _textController,
-              onSubmitted: (_) => _sendMessage(),
+              controller: textController,
+              onSubmitted: (_) => sendMessage(),
               decoration: InputDecoration(
                 hintText: 'Type your response...',
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(24)),
@@ -161,7 +202,7 @@ class _FieldSimulatorScreenState extends State<FieldSimulatorScreen> {
           const SizedBox(width: 8),
           IconButton(
             icon: const Icon(Icons.send),
-            onPressed: _isLoading ? null : _sendMessage,
+            onPressed: isLoading ? null : () => sendMessage(),
           ),
         ],
       ),
@@ -169,9 +210,9 @@ class _FieldSimulatorScreenState extends State<FieldSimulatorScreen> {
   }
 }
 
-class _SubjectMessage extends StatelessWidget {
+class SubjectMessage extends StatelessWidget {
   final ChatMessage message;
-  const _SubjectMessage({required this.message});
+  const SubjectMessage({super.key, required this.message});
 
   @override
   Widget build(BuildContext context) {
@@ -199,12 +240,14 @@ class _SubjectMessage extends StatelessWidget {
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
               ),
-            Text(
-              message.text,
-              style: theme.textTheme.bodyLarge?.copyWith(
-                color: message.sender == ChatSender.system
-                    ? theme.colorScheme.onSurfaceVariant
-                    : theme.colorScheme.onSecondaryContainer,
+            MarkdownBody(
+              data: message.text,
+              styleSheet: MarkdownStyleSheet.fromTheme(theme).copyWith(
+                p: theme.textTheme.bodyLarge?.copyWith(
+                  color: message.sender == ChatSender.system
+                      ? theme.colorScheme.onSurfaceVariant
+                      : theme.colorScheme.onSecondaryContainer,
+                ),
               ),
             ),
             if (message.feedback != null && message.feedback!.isNotEmpty) ...[
@@ -224,7 +267,7 @@ class _SubjectMessage extends StatelessWidget {
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: (message.sender == ChatSender.system
                     ? theme.colorScheme.onSurfaceVariant
-                    : theme.colorScheme.onSecondaryContainer).withOpacity(0.8),
+                    : theme.colorScheme.onSecondaryContainer),
                   fontStyle: FontStyle.italic,
                 ),
               ),
@@ -236,9 +279,9 @@ class _SubjectMessage extends StatelessWidget {
   }
 }
 
-class _OfficerMessage extends StatelessWidget {
+class OfficerMessage extends StatelessWidget {
   final ChatMessage message;
-  const _OfficerMessage({required this.message});
+  const OfficerMessage({super.key, required this.message});
 
   @override
   Widget build(BuildContext context) {

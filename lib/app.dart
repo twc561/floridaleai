@@ -10,9 +10,12 @@ class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      routerConfig: context.watch<AppRouter>().router,
+      routerConfig: appRouter, // Use the new appRouter instance
       title: 'Flutter Material AI App',
       themeMode: context.watch<ThemeProvider>().themeMode,
+      // You might need to define your light and dark themes here
+      // theme: lightTheme,
+      // darkTheme: darkTheme,
     );
   }
 }

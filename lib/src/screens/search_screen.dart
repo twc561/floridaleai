@@ -1,104 +1,109 @@
 
-// lib/src/screens/search_screen.dart
-import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // <-- CORRECT IMPORT ADDED
-import 'package:myapp/src/screens/statute_detail_screen.dart';
+import 'package:go_router/go_router.dart';
 
-class SearchScreen extends StatelessWidget {
+import '../data/statute_data.dart';
+import '../models/statute.dart';
+
+class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return const _SearchScreenContent();
-  }
+  State<SearchScreen> createState() => _SearchScreenState();
 }
 
-class _SearchScreenContent extends StatefulWidget {
-  const _SearchScreenContent();
+class _SearchScreenState extends State<SearchScreen> {
+  final TextEditingController _searchController = TextEditingController();
+  List<Statute> _searchResults = [];
+  bool _isLoading = false;
+  late final List<Statute> allStatutes;
 
   @override
-  __SearchScreenContentState createState() => __SearchScreenContentState();
-}
+  void initState() {
+    super.initState();
+    allStatutes = getStatutes();
+  }
 
-class __SearchScreenContentState extends State<_SearchScreenContent> {
-  final _textController = TextEditingController();
-  final List<String> _recentSearches = ["DUI", "316.193", "Burglary"];
-
-  void _search(String query) {
+  void _performSearch() {
+    final query = _searchController.text.trim().toLowerCase();
     if (query.isEmpty) {
+      setState(() {
+        _searchResults = [];
+      });
       return;
     }
-    // Call haptic feedback on user action
-    HapticFeedback.lightImpact(); // <-- CORRECTED USAGE
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => StatuteDetailScreen(query: query),
-      ),
-    );
+    setState(() {
+      _isLoading = true;
+    });
+
+    // In a real app, you might perform a network request here.
+    // For this example, we'll filter the local list of statutes.
+    final results = allStatutes.where((statute) {
+      return statute.title.toLowerCase().contains(query) ||
+          statute.content.toLowerCase().contains(query) ||
+          statute.severity.toLowerCase().contains(query) ||
+          statute.enhancements.any((enhancement) => enhancement.toLowerCase().contains(query)) ||
+          statute.subsections.values.any((subsection) => subsection.toLowerCase().contains(query)) ||
+          statute.examples.any((example) => example.toLowerCase().contains(query));
+    }).toList();
+
+    Future.delayed(const Duration(milliseconds: 500), () {
+      setState(() {
+        _searchResults = results;
+        _isLoading = false;
+      });
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: CustomScrollView(
-        physics: const BouncingScrollPhysics(),
-        slivers: [
-          const SliverAppBar.large(
-            title: Text('Florida Statute AI'),
-          ),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'The AI-Powered Field Guide for Law Enforcement',
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.headlineMedium,
-                  ),
-                  const SizedBox(height: 48),
-                  TextField(
-                    controller: _textController,
-                    decoration: InputDecoration(
-                      hintText: 'Enter a keyword, phrase, or statute number',
-                      prefixIcon: const Icon(Icons.search),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  Wrap(
-                    spacing: 8.0,
-                    children: _recentSearches
-                        .map((term) => FilterChip(
-                              label: Text(term),
-                              onSelected: (selected) {
-                                if (selected) {
-                                  _textController.text = term;
-                                  _search(term);
-                                }
-                              },
-                            ))
-                        .toList(),
-                  ),
-                  const SizedBox(height: 24),
-                  FilledButton(
-                    onPressed: () => _search(_textController.text),
-                    style: FilledButton.styleFrom(
-                      minimumSize: const Size(double.infinity, 50),
-                    ),
-                    child: const Text('Search'),
-                  ),
-                ],
+      appBar: AppBar(
+        title: const Text('Search Statutes'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                labelText: 'Enter a statute number or keyword',
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.search),
+                  onPressed: _performSearch,
+                ),
               ),
+              onSubmitted: (_) => _performSearch(),
             ),
-          ),
-        ],
+            const SizedBox(height: 16.0),
+            if (_isLoading)
+              const Center(child: CircularProgressIndicator())
+            else if (_searchResults.isEmpty &&
+                _searchController.text.isNotEmpty)
+              const Center(child: Text('No statutes found.'))
+            else
+              Expanded(
+                child: ListView.builder(
+                  itemCount: _searchResults.length,
+                  itemBuilder: (context, index) {
+                    final statute = _searchResults[index];
+                    return Card(
+                      margin: const EdgeInsets.symmetric(vertical: 8.0),
+                      child: ListTile(
+                        title: Text(statute.title),
+                        onTap: () {
+                          // Navigate to the detail screen for the selected statute
+                          GoRouter.of(context).push('/statute-details', extra: statute);
+                        },
+                      ),
+                    );
+                  },
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }

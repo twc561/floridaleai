@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 
 class FavoritesScreen extends StatelessWidget {
@@ -9,10 +10,8 @@ class FavoritesScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Favorites'),
       ),
-      body: const SingleChildScrollView(
-        child: Center(
-          child: Text('Favorites Screen'),
-        ),
+      body: const Center(
+        child: Text('Favorites Screen - Placeholder'),
       ),
     );
   }
