@@ -24,6 +24,12 @@
 @import firebase_core;
 #endif
 
+#if __has_include(<firebase_performance/FLTFirebasePerformancePlugin.h>)
+#import <firebase_performance/FLTFirebasePerformancePlugin.h>
+#else
+@import firebase_performance;
+#endif
+
 #if __has_include(<flutter_tts/FlutterTtsPlugin.h>)
 #import <flutter_tts/FlutterTtsPlugin.h>
 #else
@@ -48,6 +54,7 @@
   [FLTFirebaseAppCheckPlugin registerWithRegistrar:[registry registrarForPlugin:@"FLTFirebaseAppCheckPlugin"]];
   [FLTFirebaseAuthPlugin registerWithRegistrar:[registry registrarForPlugin:@"FLTFirebaseAuthPlugin"]];
   [FLTFirebaseCorePlugin registerWithRegistrar:[registry registrarForPlugin:@"FLTFirebaseCorePlugin"]];
+  [FLTFirebasePerformancePlugin registerWithRegistrar:[registry registrarForPlugin:@"FLTFirebasePerformancePlugin"]];
   [FlutterTtsPlugin registerWithRegistrar:[registry registrarForPlugin:@"FlutterTtsPlugin"]];
   [HapticFeedbackPlugin registerWithRegistrar:[registry registrarForPlugin:@"HapticFeedbackPlugin"]];
   [PathProviderPlugin registerWithRegistrar:[registry registrarForPlugin:@"PathProviderPlugin"]];
