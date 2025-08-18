@@ -1,10 +1,10 @@
 
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:go_router/go_router.dart'; // Correctly import the package
+import 'package:myapp/src/features/statutes/screens/statute_detail_screen.dart';
 import '../models/case_law.dart';
 import '../models/field_simulator/report_card.dart';
 import '../models/field_simulator/scenario_info.dart';
-import '../models/statute.dart';
 import '../screens/ai_search_advisor_screen.dart';
 import '../screens/case_law_detail_screen.dart';
 import '../screens/case_law_screen.dart';
@@ -30,7 +30,6 @@ import '../screens/scenario_selection_screen.dart';
 import '../screens/scenario_summary_screen.dart';
 import '../screens/search_screen.dart';
 import '../screens/settings_screen.dart';
-import '../screens/statute_detail_screen.dart';
 import '../screens/training_bulletins_screen.dart';
 import '../widgets/app_shell.dart';
 
@@ -42,16 +41,12 @@ final GoRouter appRouter = GoRouter(
   navigatorKey: _rootNavigatorKey,
   initialLocation: '/home',
   routes: <RouteBase>[
-    // This ShellRoute is the root of the app's navigation. It contains the
-    // AppShell with the persistent bottom navigation bar.
     ShellRoute(
       navigatorKey: _shellNavigatorKey,
       builder: (context, state, child) {
         return AppShell(child: child);
       },
       routes: <RouteBase>[
-        // Each of these routes is a page with the bottom navigation bar.
-        // Using NoTransitionPage for instant tab switching.
         GoRoute(
           path: '/home',
           pageBuilder: (context, state) => const NoTransitionPage(
@@ -63,6 +58,16 @@ final GoRouter appRouter = GoRouter(
           pageBuilder: (context, state) => const NoTransitionPage(
             child: SearchScreen(),
           ),
+          routes: [
+            // Statute detail is a sub-route of search
+            GoRoute(
+              path: 'statute-detail/:id',
+              builder: (context, state) {
+                final id = state.pathParameters['id']!;
+                return StatuteDetailScreen(statuteId: id);
+              },
+            ),
+          ]
         ),
         GoRoute(
           path: '/scenario-selection',
@@ -79,7 +84,7 @@ final GoRouter appRouter = GoRouter(
       ],
     ),
 
-    // These are top-level routes that will cover the navigation bar.
+    // Top-level routes
     GoRoute(
       path: '/favorites',
       parentNavigatorKey: _rootNavigatorKey,
@@ -101,67 +106,71 @@ final GoRouter appRouter = GoRouter(
       builder: (context, state) => const ReportAssistantScreen(),
     ),
     GoRoute(
-        path: '/legal-guides',
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const LegalGuidesScreen(),
-        routes: [
-          GoRoute(
-            path: 'ai-search-advisor',
-            builder: (context, state) => const AiSearchAdvisorScreen(),
-          ),
-          GoRoute(
-            path: ':id',
-            builder: (context, state) {
-              final id = state.pathParameters['id']!;
-              return LegalGuideDetailScreen(guideId: id);
-            },
-          ),
-        ]),
+      path: '/legal-guides',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const LegalGuidesScreen(),
+      routes: [
+        GoRoute(
+          path: 'ai-search-advisor',
+          builder: (context, state) => const AiSearchAdvisorScreen(),
+        ),
+        GoRoute(
+          path: ':id',
+          builder: (context, state) {
+            final id = state.pathParameters['id']!;
+            return LegalGuideDetailScreen(guideId: id);
+          },
+        ),
+      ],
+    ),
     GoRoute(
-        path: '/case-law',
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const CaseLawScreen(),
-        routes: [
-          GoRoute(
-            path: 'details',
-            builder: (context, state) {
-              final caseItem = state.extra as CaseLaw;
-              return CaseLawDetailScreen(caseItem: caseItem);
-            },
-          ),
-        ]),
+      path: '/case-law',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const CaseLawScreen(),
+      routes: [
+        GoRoute(
+          path: 'details',
+          builder: (context, state) {
+            final caseItem = state.extra as CaseLaw;
+            return CaseLawDetailScreen(caseItem: caseItem);
+          },
+        ),
+      ],
+    ),
     GoRoute(
-        path: '/fst-toolkit',
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const FstToolkitScreen(),
-        routes: [
-          GoRoute(
-            path: 'hgn',
-            builder: (context, state) => const HgnTestScreen(),
-          ),
-          GoRoute(
-            path: 'walk-and-turn',
-            builder: (context, state) => const WalkAndTurnTestScreen(),
-          ),
-          GoRoute(
-            path: 'one-leg-stand',
-            builder: (context, state) => const OneLegStandTestScreen(),
-          ),
-        ]),
+      path: '/fst-toolkit',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const FstToolkitScreen(),
+      routes: [
+        GoRoute(
+          path: 'hgn',
+          builder: (context, state) => const HgnTestScreen(),
+        ),
+        GoRoute(
+          path: 'walk-and-turn',
+          builder: (context, state) => const WalkAndTurnTestScreen(),
+        ),
+        GoRoute(
+          path: 'one-leg-stand',
+          builder: (context, state) => const OneLegStandTestScreen(),
+        ),
+      ],
+    ),
     GoRoute(
-        path: '/crash-helper',
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const CrashHelperScreen(),
-        routes: [
-          GoRoute(
-            path: 'checklists',
-            builder: (context, state) => const CrashChecklistsScreen(),
-          ),
-          GoRoute(
-            path: 'speed-calculator',
-            builder: (context, state) => const SpeedCalculatorScreen(),
-          ),
-        ]),
+      path: '/crash-helper',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const CrashHelperScreen(),
+      routes: [
+        GoRoute(
+          path: 'checklists',
+          builder: (context, state) => const CrashChecklistsScreen(),
+        ),
+        GoRoute(
+          path: 'speed-calculator',
+          builder: (context, state) => const SpeedCalculatorScreen(),
+        ),
+      ],
+    ),
     GoRoute(
       path: '/language-helper',
       parentNavigatorKey: _rootNavigatorKey,
@@ -176,14 +185,6 @@ final GoRouter appRouter = GoRouter(
       path: '/training-bulletins',
       parentNavigatorKey: _rootNavigatorKey,
       builder: (context, state) => const TrainingBulletinsScreen(),
-    ),
-    GoRoute(
-      path: '/statute-details',
-      parentNavigatorKey: _rootNavigatorKey,
-      builder: (context, state) {
-        final statute = state.extra as Statute;
-        return StatuteDetailScreen(statute: statute);
-      },
     ),
     GoRoute(
       path: '/field-simulator',

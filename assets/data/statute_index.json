@@ -1,0 +1,43 @@
+
+[
+  {
+    "id": "fl-316-193",
+    "title": "Driving Under the Influence (DUI)",
+    "code": "316.193",
+    "category": "Traffic",
+    "degreeOfCharge": "Misdemeanor",
+    "difficulty": "Intermediate"
+  },
+  {
+    "id": "fl-812-014",
+    "title": "Theft",
+    "code": "812.014",
+    "category": "Property",
+    "degreeOfCharge": "Varies",
+    "difficulty": "Basic"
+  },
+  {
+    "id": "fl-782-04",
+    "title": "Murder",
+    "code": "782.04",
+    "category": "Violent Crime",
+    "degreeOfCharge": "Felony",
+    "difficulty": "Advanced"
+  },
+  {
+    "id": "fl-784-03",
+    "title": "Battery",
+    "code": "784.03",
+    "category": "Violent Crime",
+    "degreeOfCharge": "Misdemeanor",
+    "difficulty": "Basic"
+  },
+  {
+    "id": "fl-817-034",
+    "title": "Communications Fraud",
+    "code": "817.034",
+    "category": "Property",
+    "degreeOfCharge": "Varies",
+    "difficulty": "Advanced"
+  }
+]

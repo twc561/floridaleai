@@ -1,0 +1,155 @@
+
+{
+  "fl-316-193": {
+    "id": "fl-316-193",
+    "title": "Driving Under the Influence (DUI)",
+    "code": "316.193",
+    "description": "This statute prohibits driving or being in actual physical control of a vehicle while under the influence of alcoholic beverages or controlled substances to the extent that normal faculties are impaired.",
+    "practicalSummary": "Prohibits driving while impaired by alcohol or drugs. Key elements are control of the vehicle and impairment of normal faculties.",
+    "elementsOfTheCrime": [
+      "The defendant drove or was in actual physical control of a vehicle.",
+      "While driving or in actual physical control of the vehicle, the defendant was under the influence of alcoholic beverages, a chemical substance, or a controlled substance.",
+      "The defendant's normal faculties were impaired, or the defendant had a blood-alcohol level of 0.08 or more grams of alcohol per 100 milliliters of blood or 210 liters of breath."
+    ],
+    "degreeOfCharge": "Misdemeanor",
+    "difficulty": "Intermediate",
+    "category": "Traffic",
+    "relatedStatutes": [
+      "316.1932",
+      "316.1933",
+      "316.1934"
+    ],
+    "realWorldExample": "An officer observes a car swerving between lanes. Upon stopping the vehicle, the driver exhibits slurred speech and smells of alcohol. A breathalyzer test confirms a BAC of 0.12.",
+    "investigativeTips": [
+      "Carefully document all signs of impairment.",
+      "Administer field sobriety exercises according to standardized procedures.",
+      "Ensure the breathalyzer is properly calibrated."
+    ],
+    "commonMistakes": [
+      "Failing to establish the time of driving.",
+      "Improperly conducted field sobriety tests.",
+      "Not reading Miranda rights before custodial interrogation."
+    ],
+    "lastUpdated": "2023-10-27T10:00:00Z",
+    "popularity": 95
+  },
+  "fl-812-014": {
+    "id": "fl-812-014",
+    "title": "Theft",
+    "code": "812.014",
+    "description": "A person commits theft if he or she knowingly obtains or uses, or endeavors to obtain or use, the property of another with intent to, either temporarily or permanently deprive the other person of a right to the property or a benefit from the property or appropriate the property to his or her own use or to the use of any person not entitled to the use of the property.",
+    "practicalSummary": "Prohibits taking someone else's property with the intent to deprive them of it. The value of the property determines the severity of the charge.",
+    "elementsOfTheCrime": [
+      "The defendant knowingly obtained or used, or endeavored to obtain or use, the property of another.",
+      "The defendant did so with the intent to, either temporarily or permanently, deprive the other person of a right to the property or a benefit from the property, or to appropriate the property to his or her own use or to the use of any person not entitled to the use of the property."
+    ],
+    "degreeOfCharge": "Varies",
+    "difficulty": "Basic",
+    "category": "Property",
+    "relatedStatutes": [
+      "812.012",
+      "812.016"
+    ],
+    "realWorldExample": "A person is caught on camera taking a bicycle from a public rack and riding away. The owner identifies the bicycle and confirms it was taken without permission.",
+    "investigativeTips": [
+      "Establish ownership of the property.",
+      "Document the value of the property for charging purposes.",
+      "Look for surveillance footage or witnesses."
+    ],
+    "commonMistakes": [
+      "Failing to prove the defendant's intent to steal.",
+      "Miscategorizing the value of the stolen property.",
+      "Ignoring chain of custody for evidence."
+    ],
+    "lastUpdated": "2023-11-05T14:30:00Z",
+    "popularity": 85
+  },
+  "fl-782-04": {
+    "id": "fl-782-04",
+    "title": "Murder",
+    "code": "782.04",
+    "description": "The unlawful killing of a human being, when perpetrated from a premeditated design to effect the death of the person killed or any human being, or when committed by a person engaged in the perpetration of, or in the attempt to perpetrate, any specified felony, is murder in the first degree.",
+    "practicalSummary": "Covers the unlawful killing of a person with premeditation or during the commission of a serious felony. This is the most serious homicide charge.",
+    "elementsOfTheCrime": [
+      "The victim is dead.",
+      "The defendant's act caused the death of the victim.",
+      "The death was caused by the unlawful killing of the victim.",
+      "There was a premeditated design to kill."
+    ],
+    "degreeOfCharge": "Felony",
+    "difficulty": "Advanced",
+    "category": "Violent Crime",
+    "relatedStatutes": [
+      "782.07",
+      "775.082"
+    ],
+    "realWorldExample": "A suspect plans and carries out the killing of another individual for financial gain. Evidence includes witness testimony, surveillance footage, and financial records.",
+    "investigativeTips": [
+      "Secure the crime scene immediately.",
+      "Identify and interview all potential witnesses.",
+      "Work with the medical examiner to determine the cause of death."
+    ],
+    "commonMistakes": [
+      "Contaminating the crime scene.",
+      "Failing to establish a clear timeline of events.",
+      "Overlooking potential accomplices."
+    ],
+    "lastUpdated": "2024-01-15T09:00:00Z",
+    "popularity": 90
+  },
+  "fl-784-03": {
+    "id": "fl-784-03",
+    "title": "Battery",
+    "code": "784.03",
+    "description": "The offense of battery occurs when a person actually and intentionally touches or strikes another person against the will of the other; or intentionally causes bodily harm to another person.",
+    "practicalSummary": "Covers unwanted touching or striking of another person. It is a very common charge and a foundational violent crime.",
+    "elementsOfTheCrime": [
+      "The defendant actually and intentionally touched or struck the victim against their will.",
+      "OR The defendant intentionally caused bodily harm to the victim."
+    ],
+    "degreeOfCharge": "Misdemeanor",
+    "difficulty": "Basic",
+    "category": "Violent Crime",
+    "relatedStatutes": ["784.041", "784.045"],
+    "realWorldExample": "During an argument, one person shoves another person. The shove constitutes an intentional, unwanted touching.",
+    "investigativeTips": [
+      "Photograph any visible injuries.",
+      "Interview both parties and any witnesses separately.",
+      "Note any size or strength disparities between the individuals involved."
+    ],
+    "commonMistakes": [
+      "Confusing assault (threat of harm) with battery (actual contact).",
+      "Failing to document the lack of consent from the victim."
+    ],
+    "lastUpdated": "2023-09-12T11:00:00Z",
+    "popularity": 92
+  },
+  "fl-817-034": {
+    "id": "fl-817-034",
+    "title": "Communications Fraud",
+    "code": "817.034",
+    "description": "A person commits communications fraud if he or she engages in a scheme to defraud and, in furtherance of that scheme, communicates with any person by any means of wire, radio, electromagnetic, photoelectronic, or photooptical system.",
+    "practicalSummary": "This is Florida's main anti-fraud statute, often called the 'Florida RICO Act'. It covers organized schemes to defraud using any form of electronic communication.",
+    "elementsOfTheCrime": [
+      "The defendant engaged in a systematic, ongoing course of conduct.",
+      "There was a fraudulent intent to obtain property.",
+      "The defendant used some form of communication (phone, internet, etc.) to execute the scheme."
+    ],
+    "degreeOfCharge": "Varies",
+    "difficulty": "Advanced",
+    "category": "Property",
+    "relatedStatutes": ["817.60", "934.03"],
+    "realWorldExample": "A group of individuals set up a fake charity website and use social media to solicit donations, which they then divert to their personal accounts.",
+    "investigativeTips": [
+      "Obtain search warrants for electronic devices and online accounts.",
+      "Follow the money trail with subpoenas to financial institutions.",
+      "Document the full scope of the scheme and identify all victims."
+    ],
+    "commonMistakes": [
+      "Focusing on a single fraudulent act rather than the entire scheme.",
+      "Failing to prove the organized nature of the conduct."
+    ],
+    "lastUpdated": "2024-02-20T16:00:00Z",
+    "popularity": 78
+  }
+}

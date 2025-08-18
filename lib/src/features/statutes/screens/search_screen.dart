@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:myapp/src/features/statutes/models/statute_index.dart';
 import 'package:myapp/src/features/statutes/services/gemini_statute_service.dart';
 import 'package:myapp/src/features/statutes/services/statute_service.dart';
-import 'package:myapp/src/features/statutes/widgets/statute_card.dart'; // Corrected the import path
+import 'package.myapp/src/features/statutes/widgets/statute_card.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -21,8 +21,9 @@ class _SearchScreenState extends State<SearchScreen> {
   String _searchQuery = '';
   bool _isAiSearching = false;
 
-  // Updated state to hold a list of AI suggestions.
-  List<AiStatuteSuggestion> _aiSuggestions = [];
+  StatuteIndex? _aiSuggestedStatute;
+  double _aiConfidence = 0.0;
+  String _aiReasoning = '';
 
   @override
   void initState() {
@@ -45,7 +46,9 @@ class _SearchScreenState extends State<SearchScreen> {
   void _filterStatutes(String query) {
     setState(() {
       _searchQuery = query;
-      _aiSuggestions = [];
+      _aiSuggestedStatute = null;
+      _aiConfidence = 0.0;
+      _aiReasoning = '';
 
       if (query.isEmpty) {
         _filteredStatutes = _allStatutes;
@@ -70,14 +73,24 @@ class _SearchScreenState extends State<SearchScreen> {
       _isAiSearching = true;
     });
 
-    final suggestions = await _geminiStatuteService.findStatuteWithAi(query);
+    // 1. Correctly destructure the tuple response from the service.
+    final (statuteId, confidence, reasoning) = await _geminiStatuteService.findStatuteWithAi(query);
 
     if (mounted) {
-      // Filter out low-confidence suggestions before updating the state.
-      final confidentSuggestions = suggestions.where((s) => s.confidenceScore >= 0.2).toList();
+      StatuteIndex? aiResult;
+      if (statuteId != null) {
+        try {
+          aiResult = _allStatutes.firstWhere((s) => s.id == statuteId);
+        } catch (e) {
+          debugPrint("AI returned invalid statute ID: $statuteId");
+        }
+      }
       
+      // 2. Update all state variables in a single, atomic operation.
       setState(() {
-        _aiSuggestions = confidentSuggestions;
+        _aiSuggestedStatute = aiResult;
+        _aiConfidence = confidence;
+        _aiReasoning = reasoning;
         _isAiSearching = false;
       });
     }
@@ -146,40 +159,18 @@ class _SearchScreenState extends State<SearchScreen> {
       );
     }
 
-    // Display the list of AI suggestions.
-    if (_aiSuggestions.isNotEmpty) {
+    if (_aiSuggestedStatute != null && _aiConfidence >= 0.7) {
       return Column(
         children: [
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Text(
-              'No direct matches. AI suggests the following:',
+              'AI Suggestion (Confidence: ${(_aiConfidence * 100).toStringAsFixed(1)}%)\\n"${_aiReasoning}"',
               style: Theme.of(context).textTheme.titleMedium,
               textAlign: TextAlign.center,
             ),
           ),
-          Expanded(
-            child: ListView.builder(
-              itemCount: _aiSuggestions.length,
-              itemBuilder: (context, index) {
-                final suggestion = _aiSuggestions[index];
-                // Find the full statute info from the ID.
-                final statute = _allStatutes.firstWhere((s) => s.id == suggestion.statuteId);
-                return Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                      child: Text(
-                        'Suggestion ${index + 1} (Confidence: ${(suggestion.confidenceScore * 100).toStringAsFixed(1)}%)\\n"${suggestion.reasoning}"',
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                    StatuteCard(statute: statute),
-                  ],
-                );
-              },
-            ),
-          ),
+          StatuteCard(statute: _aiSuggestedStatute!),
         ],
       );
     }

@@ -27,6 +27,12 @@ class MoreMenuScreen extends StatelessWidget {
         subtitle: 'Search recent and landmark case law.',
         onTap: () => GoRouter.of(context).go('/case-law'),
       ),
+       FeatureTile(
+        title: 'Statute Navigator',
+        icon: Icons.balance,
+        subtitle: 'Intelligent search for Florida Statutes.',
+        onTap: () => GoRouter.of(context).go('/search'),
+      ),
       FeatureTile(
         title: 'FST Toolkit',
         icon: Icons.directions_car,
